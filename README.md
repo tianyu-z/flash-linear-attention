@@ -281,17 +281,9 @@ Simply run it by:
 ```sh
 $ python -m benchmarks.benchmark_generation \
   --path 'fla-hub/gla-1.3B-100B' \
-  --repetition_penalty 2. \
-  --prompt="Hello everyone, I'm Songlin Yang"
-
-Prompt:
-Hello everyone, I'm Songlin Yang
-Generated:
-Hello everyone, I'm Songlin Yang.
-I am a 20 year old girl from China who is currently studying in the United States of America for my Master degree and also working as an English teacher at school here on campus since last summer (1st semester). My main goal to be able do well with this course so that we can have
-
-Prompt length: 10, generation length: 64
-Total prompt processing + decoding time: 4593ms
+  --repetition_penalty 1.1 \
+  --length 128 \
+  --maxlen 256
 ```
 
 All of the pretrained models currently available can be found in [`fla-hub`](https://huggingface.co/fla-hub).
@@ -506,19 +498,19 @@ If a GPU can't load a full copy of the model, please refer to [this link](https:
 
 We compared our Triton-based RetNet implementation with CUDA-based FlashAttention2, using a batch size of 8, 32 heads, and a head dimension of 128, across different sequence lengths.
 These tests were conducted on a single H100 80GB GPU, as illustrated in the following graph
-```py
+```sh
 # you might have to first install `fla` to enable its import via `pip install -e .`
-$ python benchmarks/ops/benchmark_retention.py
-Performance:
-         T  chunk_fwd  parallel_fwd  flash_fwd  chunk_fwdbwd  parallel_fwdbwd  flash_fwdbwd
-0    128.0   0.264032      0.243536   0.083488      1.301856         1.166784      0.320704
-1    256.0   0.273472      0.252848   0.094304      1.345872         1.300608      0.807936
-2    512.0   0.303600      0.278896   0.098112      1.503168         1.433184      0.857216
-3   1024.0   0.357248      0.367360   0.156528      1.773552         2.303424      1.160864
-4   2048.0   0.454624      0.605616   0.340928      2.283728         4.483360      1.955936
-5   4096.0   0.638960      1.378016   1.004992      3.374720        12.271215      4.813776
-6   8192.0   1.012352      4.201344   3.625008      5.581808        40.833618     15.023697
-7  16384.0   1.748512     14.489664  13.710080     10.191552       153.093765     54.336864
+# Benchmark a single op (e.g., retention)
+$ python -m benchmarks.ops.run --op chunk_retention
+
+# Benchmark multiple ops
+$ python -m benchmarks.ops.run --op chunk_gla chunk_kda
+
+# List all registered ops
+$ python -m benchmarks.ops.run --list
+
+# Compare against main branch
+$ python -m benchmarks.ops.run --op chunk_retention --base main
 ```
 
 <div align="center">
